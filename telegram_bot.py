@@ -30,6 +30,9 @@ def greet_user(bot, update):
 
 
 def bestrooms_byCity(bot, update):
+    '''
+    Search by city
+    '''
     update.message.reply_text("Ищем в " + update.message.text + " ..")
 
 
