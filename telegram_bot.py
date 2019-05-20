@@ -1,33 +1,36 @@
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import t_info as ti
 
 # Настройки прокси
 PROXY = {'proxy_url': 'socks5://t1.learn.python.ru:1080', 'urllib3_proxy_kwargs': {'username': 'learn', 'password': 'python'}}
 
-# Функция, которая соединяется с платформой Telegram, "тело" нашего бота
-
 
 def main():
-    ‘‘‘
-    Комментарий к функции обычно оформляют так
-    And better in English
-    ’’’
-    getroom_bot = Updater("897235175:AAEayBIz7SGML4HTAf8qI9U6ympTbPJ6dGk", request_kwargs=PROXY)
-    # токен светить плохо, так как любой другой человек сможет его использовать
-    # чтобы этого не произошло, его обычно выносят в отдельный файл, напр мер secrets.py, а потом импортируют
-    # сам файл, естественно, добавляют в .gitignore
+    '''
+    Main bot listener and dispatcher
+    '''
+    getroom_bot = Updater(ti.t_str, request_kwargs=PROXY)
 
     dpatch = getroom_bot.dispatcher
     dpatch.add_handler(CommandHandler("start", greet_user))
- 
+    dpatch.add_handler(MessageHandler(Filters.text, bestrooms_byCity))
+
     getroom_bot.start_polling()
     getroom_bot.idle()
 
 
 def greet_user(bot, update):
-    # print(update)
-    # хороший тон - удалять все неиспользуемые строки перед коммитом
-    # давай добавим ещё обращение по имени или юзернейму? И сделаем 2 Сообщения, одно - приветствие, второе - выбор города
-    update.message.reply_text("Привет, хочешь найти комнату на сегодня? Напиши название города где собираешься остановиться")
+    '''
+    Greet and request city
+    '''
+
+    chat_username = update.message.chat.username
+    update.message.reply_text("Привет, " + chat_username + ", хочешь найти комнату на сегодня?")
+    update.message.reply_text("Напиши название города, где собираешься остановиться")
+
+
+def bestrooms_byCity(bot, update):
+    update.message.reply_text("Ищем в " + update.message.text + " ..")
 
 
 main()
