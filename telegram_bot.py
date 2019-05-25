@@ -1,15 +1,27 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import t_info as ti
+import logging
 
 # Настройки прокси
 PROXY = {'proxy_url': 'socks5://t1.learn.python.ru:1080', 'urllib3_proxy_kwargs': {'username': 'learn', 'password': 'python'}}
+
+logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO,
+                    filename='telegram_bot.log'
+                    )
 
 
 def main():
     '''
     Main bot listener and dispatcher
     '''
-    getroom_bot = Updater(ti.t_str, request_kwargs=PROXY)
+    tcp_logger = logging.getLogger('tcplogger')
+    try:
+        getroom_bot = Updater(ti.t_str, request_kwargs=PROXY)
+    except (ConnectionError, TimeoutError):
+        tcp_logger.warning("Protocol problem: %s", "ошибка установки соединения")
+    finally:
+        tcp_logger.warning("Protocol problem: %s", "ошибка установки соединения с telegram-сервером")
 
     dpatch = getroom_bot.dispatcher
     dpatch.add_handler(CommandHandler("start", greet_user))
