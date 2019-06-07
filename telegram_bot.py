@@ -48,4 +48,5 @@ def bestrooms_byCity(bot, update):
     update.message.reply_text("Ищем в " + update.message.text + " ..")
 
 
-main()
+if __name__ == "__main__":
+    main()
