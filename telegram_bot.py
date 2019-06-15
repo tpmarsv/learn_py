@@ -1,6 +1,9 @@
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import t_info as ti
 import logging
+import json
+import requests
+import emoji
 
 # Настройки прокси
 PROXY = {'proxy_url': 'socks5://t1.learn.python.ru:1080', 'urllib3_proxy_kwargs': {'username': 'learn', 'password': 'python'}}
@@ -45,7 +48,16 @@ def bestrooms_byCity(bot, update):
     '''
     Search by city
     '''
-    update.message.reply_text("Ищем в " + update.message.text + " ..")
+    search_city = update.message.text
+    update.message.reply_text("Ищем в " + search_city + " ..")
+
+    request_str = "http://engine.hotellook.com/api/v2/cache.json?location="+search_city+"&currency=rub&checkIn=2019-07-10&checkOut=2019-07-12&limit=4"
+    response_api = requests.get(request_str)
+    hotels_j = json.loads(response_api.text)
+    
+    message_name = hotels_j[0]['hotelName']
+    message_low_price = hotels_j[0]['priceFrom']
+    update.message.reply_text("Рекомендуем " + message_name + " по цене " + str(message_low_price) + " руб")
 
 
 if __name__ == "__main__":
