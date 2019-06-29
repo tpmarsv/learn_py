@@ -62,13 +62,12 @@ def bestrooms_byCity(bot, update):
     hotels_j = json.loads(response_api.text)
     hotels_j_s = sort_list_of_dict(hotels_j, 'priceFrom')
 
-
     for i in range(0, 3):
         hotel_message_name = hotels_j_s[i]['hotelName']
         message_low_price = hotels_j_s[i]['priceFrom']
         hotel_id = str(hotels_j_s[i]['hotelId'])
-        keyboard = [[InlineKeyboardButton('Бронь', callback_data='book in '+ hotel_id), InlineKeyboardButton('Детали', callback_data='details for ' + hotel_id)]]
-        update.message.reply_text("Рекомендуем " + hotel_message_name + " по цене " + str(message_low_price) + " руб")
+        keyboard = [[InlineKeyboardButton('Бронь', url='https://search.hotellook.com/hotels?destination=Staycity+Aparthotels+West+End&checkIn=2019-07-06&checkOut=2019-07-13&marker=direct&children=&adults=1&language=ru&currency=rub&hotelId=333885', callback_data='book in ' + hotel_id), InlineKeyboardButton('Детали', callback_data='details for ' + hotel_id)]]
+        update.message.reply_text("Рекомендуем " + hotel_message_name + " по цене от " + str(message_low_price) + " руб")
         update.message.reply_text("Нравится?", reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True))
 
 
@@ -83,6 +82,7 @@ def button_cl(bot, update):
     '''
     query = update.callback_query
     if ('book' in query.data):
+        print(query.data)
         query.edit_message_text(text="Переходим к бронированию " + query.data)
     elif ('details' in query.data):
         query.edit_message_text(text="Переходим к номерам отеля " + query.data)
