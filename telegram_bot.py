@@ -6,6 +6,7 @@ import json
 import requests
 import emoji
 from datetime import datetime
+from funcy import cache
 
 # Настройки прокси
 PROXY = {'proxy_url': 'socks5://t1.learn.python.ru:1080', 'urllib3_proxy_kwargs': {'username': 'learn', 'password': 'python'}}
@@ -49,11 +50,27 @@ def greet_user(bot, update):
 
 def bestrooms_byCity(bot, update):
     '''
-    Search by city
+    Search by city and response to user best rooms by given params
     '''
     search_city = update.message.text
     update.message.reply_text("Ищем в " + search_city + " ..")
 
+    hotels_j_s = get_rooms_byCity(search_city)
+
+    for i in range(0, 3):
+        hotel_message_name = hotels_j_s[i]['hotelName']
+        message_low_price = hotels_j_s[i]['priceFrom']
+        hotel_id = str(hotels_j_s[i]['hotelId'])
+        keyboard = [[InlineKeyboardButton('Бронь', url='https://search.hotellook.com/hotels?destination=Staycity+Aparthotels+West+End&checkIn=2019-07-06&checkOut=2019-07-13&marker=direct&children=&adults=1&language=ru&currency=rub&hotelId=333885', callback_data='book in ' + hotel_id), InlineKeyboardButton('Детали', callback_data='details for ' + hotel_id)]]
+        update.message.reply_text("Рекомендуем " + hotel_message_name + " по цене от " + str(message_low_price) + " руб")
+        update.message.reply_text("Нравится?", reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True))
+
+
+@cache(150)
+def get_rooms_byCity(search_city):
+    '''
+    Request API and use sort to return sort list of hotels (not rooms)
+    '''
     today_date = datetime.now()
     today_date = today_date.strftime('%Y-%m-%d')
 
@@ -61,15 +78,8 @@ def bestrooms_byCity(bot, update):
     response_api = requests.get(request_str)
     hotels_j = json.loads(response_api.text)
     hotels_j_s = sort_list_of_dict(hotels_j, 'priceFrom')
-
-
-    for i in range(0, 3):
-        hotel_message_name = hotels_j_s[i]['hotelName']
-        message_low_price = hotels_j_s[i]['priceFrom']
-        hotel_id = str(hotels_j_s[i]['hotelId'])
-        keyboard = [[InlineKeyboardButton('Бронь', callback_data='book in '+ hotel_id), InlineKeyboardButton('Детали', callback_data='details for ' + hotel_id)]]
-        update.message.reply_text("Рекомендуем " + hotel_message_name + " по цене " + str(message_low_price) + " руб")
-        update.message.reply_text("Нравится?", reply_markup=InlineKeyboardMarkup(keyboard, one_time_keyboard=True))
+    
+    return hotels_j_s
 
 
 def sort_list_of_dict(ld_for_sort, sort_by_item):
