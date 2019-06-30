@@ -93,7 +93,6 @@ def button_cl(bot, update):
     '''
     query = update.callback_query
     if ('book' in query.data):
-        print(query.data)
         query.edit_message_text(text="Переходим к бронированию " + query.data)
     elif ('details' in query.data):
         query.edit_message_text(text="Переходим к номерам отеля " + query.data)
